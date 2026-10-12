@@ -9,7 +9,8 @@
 - Run: `go run . [pattern]` or `go run . -c <name>`
 - Test all: `go test ./...`; single test: `go test ./internal/git -run TestName`
 - Format: `gofmt -w .`
-No Makefile, linter config, CI, or tests exist in this repo.
+- Release check: `goreleaser check`; local dry run: `goreleaser release --snapshot --clean`
+No Makefile, linter config, or test files exist in this repo.
 
 ## Layout
 - `main.go` → `cmd.Execute()` only.
@@ -33,6 +34,15 @@ No Makefile, linter config, CI, or tests exist in this repo.
 - Viper read errors are ignored, so a missing/broken config silently uses defaults.
 - `Execute()` prints the error to stdout and calls `os.Exit(1)`.
 
+## Releasing
+- Pushing a `v*` tag triggers `.github/workflows/release.yml` (GoReleaser v2):
+  builds darwin/linux/windows × amd64/arm64, publishes a GitHub Release with
+  `checksums.txt`, and updates the `miguel5/homebrew-tap` cask.
+- Config: `.goreleaser.yaml`. Version comes from `cmd/root.go`'s `version` var,
+  injected via ldflags; local builds show `dev`.
+
 ## Gotchas
-- Every dependency in `go.mod` is marked `// indirect` despite being direct
-  imports; `go mod tidy` will (correctly) change this.
+- Homebrew tap publishing needs the `HOMEBREW_TAP_GITHUB_TOKEN` repo secret;
+  without it the release job fails at the cask step (binaries still publish).
+- Release version ldflags target `github.com/miguel5/gswitch/cmd.version`; renaming
+  that package/var breaks `--version` in released binaries.

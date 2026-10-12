@@ -1,0 +1,53 @@
+version: 2
+
+project_name: gswitch
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: gswitch
+    main: .
+    binary: gswitch
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/miguel5/gswitch/cmd.version={{ .Version }}
+
+archives:
+  - id: gswitch
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+      - "^test:"
+      - "^ci:"
+
+homebrew_casks:
+  - name: gswitch
+    repository:
+      owner: miguel5
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/miguel5/gswitch
+    description: Interactive git branch switcher with fuzzy search
+    license: MIT
