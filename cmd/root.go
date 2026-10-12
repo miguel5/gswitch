@@ -14,13 +14,16 @@ import (
 	"github.com/miguel5/gswitch/internal/git"
 )
 
+var version = "dev"
+
 var createBranch bool
 var createUpstream bool
 
 var rootCmd = &cobra.Command{
-	Use:   "gswitch [pattern]",
-	Short: "Interactive git branch switcher",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "gswitch [pattern]",
+	Short:   "Interactive git branch switcher",
+	Version: version,
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load()
 		if err != nil {

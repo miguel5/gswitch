@@ -4,9 +4,23 @@ Interactive git branch switcher with fuzzy search.
 
 ## Install
 
-Requires [Go](https://go.dev/dl/). `git` must be on your `PATH` at runtime.
+`git` must be on your `PATH` at runtime.
 
-Install directly:
+### Homebrew (macOS/Linux)
+
+```bash
+brew install miguel5/tap/gswitch
+```
+
+### Prebuilt binaries
+
+Download the archive for your OS/arch from the
+[latest release](https://github.com/miguel5/gswitch/releases/latest), extract it,
+and move `gswitch` somewhere on your `PATH`.
+
+### With Go
+
+Requires [Go](https://go.dev/dl/).
 
 ```bash
 go install github.com/miguel5/gswitch@latest
@@ -14,7 +28,7 @@ go install github.com/miguel5/gswitch@latest
 
 Make sure `$(go env GOPATH)/bin` is on your `PATH`.
 
-Or build from source:
+### Build from source
 
 ```bash
 git clone https://github.com/miguel5/gswitch.git
