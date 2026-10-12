@@ -15,6 +15,7 @@ import (
 )
 
 var createBranch bool
+var createUpstream bool
 
 var rootCmd = &cobra.Command{
 	Use:   "gswitch [pattern]",
@@ -24,6 +25,10 @@ var rootCmd = &cobra.Command{
 		cfg, err := config.Load()
 		if err != nil {
 			return err
+		}
+
+		if createUpstream && !createBranch {
+			return fmt.Errorf("--upstream requires --create")
 		}
 
 		if createBranch {
@@ -39,7 +44,15 @@ var rootCmd = &cobra.Command{
 
 			fmt.Printf("Creating branch %s\n", fullBranchName)
 
-			return git.CreateAndSwitchBranch(fullBranchName)
+			if err := git.CreateAndSwitchBranch(fullBranchName); err != nil {
+				return err
+			}
+
+			if createUpstream {
+				return git.PushAndSetUpstream(fullBranchName)
+			}
+
+			return nil
 		}
 
 		query := ""
@@ -91,6 +104,14 @@ func init() {
 		"c",
 		false,
 		"Create a new branch",
+	)
+
+	rootCmd.Flags().BoolVarP(
+		&createUpstream,
+		"upstream",
+		"u",
+		false,
+		"Push the new branch and set its upstream (requires --create)",
 	)
 }
 
