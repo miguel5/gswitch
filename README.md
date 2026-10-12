@@ -37,3 +37,17 @@ gswitch auth
 ```
 
 Filter branches matching "auth".
+
+```bash
+gswitch -c new-feature
+```
+
+Create a new branch named `feature/new-feature` and switch to it.
+
+```bash
+gswitch -cu new-feature
+```
+
+Create and switch to `feature/new-feature`, then push it to the default remote
+and set its upstream. `-u` must be combined with `-c`; the remote is `origin`
+when present, otherwise the only configured remote.
