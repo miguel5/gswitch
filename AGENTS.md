@@ -10,7 +10,9 @@
 - Test all: `go test ./...`; single test: `go test ./internal/git -run TestName`
 - Format: `gofmt -w .`
 - Release check: `goreleaser check`; local dry run: `goreleaser release --snapshot --clean`
-No Makefile, linter config, or test files exist in this repo.
+No Makefile or linter config; `.github/workflows/ci.yml` runs
+gofmt/vet/test/build on pushes and PRs, and `release.yml` (GoReleaser) runs on
+`v*` tags.
 
 ## Layout
 - `main.go` → `cmd.Execute()` only.
