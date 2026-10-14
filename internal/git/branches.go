@@ -36,6 +36,27 @@ func LocalBranches() ([]string, error) {
 	return branches, nil
 }
 
+func CurrentBranch() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current branch: %w", err)
+	}
+
+	return strings.TrimSpace(string(out)), nil
+}
+
+func Commit(message string) error {
+	cmd := exec.Command("git", "commit", "-m", message)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	return cmd.Run()
+}
+
 func CreateAndSwitchBranch(branch string) error {
 	cmd := exec.Command("git", "switch", "-c", branch)
 
