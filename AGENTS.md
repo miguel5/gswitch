@@ -33,6 +33,11 @@ gofmt/vet/test/build on pushes and PRs, and `release.yml` (GoReleaser) runs on
 - `-u/--upstream` (written `gswitch -cu <name>`) requires `-c`; after creating
   it runs `git push --set-upstream <remote> <branch>`. The remote is `origin`
   if present, else the sole configured remote, else it errors.
+- `-m/--message <text>` is a standalone mode: it extracts the first
+  `PREFIX-123` token from the current branch name (uppercased) and runs
+  `git commit -m "<TICKET>: <text>"`. If no ticket is found (or on detached
+  `HEAD`) it commits the message as-is with a note to stderr. It cannot be
+  combined with `-c`/`-u` or a pattern, and empty messages error.
 - Viper read errors are ignored, so a missing/broken config silently uses defaults.
 - `Execute()` prints the error to stdout and calls `os.Exit(1)`.
 

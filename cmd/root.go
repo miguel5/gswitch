@@ -18,6 +18,7 @@ var version = "dev"
 
 var createBranch bool
 var createUpstream bool
+var message string
 
 var rootCmd = &cobra.Command{
 	Use:     "gswitch [pattern]",
@@ -28,6 +29,22 @@ var rootCmd = &cobra.Command{
 		cfg, err := config.Load()
 		if err != nil {
 			return err
+		}
+
+		if cmd.Flags().Changed("message") {
+			if createBranch || createUpstream {
+				return fmt.Errorf("--message cannot be combined with --create/--upstream")
+			}
+
+			if len(args) > 0 {
+				return fmt.Errorf("--message cannot be combined with a pattern")
+			}
+
+			if message == "" {
+				return fmt.Errorf("message cannot be empty")
+			}
+
+			return commitWithTicket(message)
 		}
 
 		if createUpstream && !createBranch {
@@ -116,6 +133,14 @@ func init() {
 		false,
 		"Push the new branch and set its upstream (requires --create)",
 	)
+
+	rootCmd.Flags().StringVarP(
+		&message,
+		"message",
+		"m",
+		"",
+		"Commit staged changes with the branch's ticket prefix",
+	)
 }
 
 func switchBranch(branch string) error {
@@ -127,6 +152,38 @@ func switchBranch(branch string) error {
 	c.Stdin = os.Stdin
 
 	return c.Run()
+}
+
+var ticketRe = regexp.MustCompile(`[A-Za-z]+-[0-9]+`)
+
+func commitWithTicket(msg string) error {
+	branch, err := git.CurrentBranch()
+	if err != nil {
+		return err
+	}
+
+	full := msg
+
+	if ticket := ticketFromBranch(branch); ticket != "" {
+		full = ticket + ": " + msg
+	} else {
+		fmt.Fprintf(os.Stderr, "note: no ticket found in branch %q; committing without a prefix\n", branch)
+	}
+
+	return git.Commit(full)
+}
+
+func ticketFromBranch(branch string) string {
+	if branch == "HEAD" {
+		return ""
+	}
+
+	match := ticketRe.FindString(branch)
+	if match == "" {
+		return ""
+	}
+
+	return strings.ToUpper(match)
 }
 
 func normalizeBranchName(name string) string {

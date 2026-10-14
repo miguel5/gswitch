@@ -65,3 +65,12 @@ gswitch -cu new-feature
 Create and switch to `feature/new-feature`, then push it to the default remote
 and set its upstream. `-u` must be combined with `-c`; the remote is `origin`
 when present, otherwise the only configured remote.
+
+```bash
+gswitch -m "fix login redirect"
+```
+
+Commit staged changes with the current branch's ticket prefixed automatically.
+On a branch like `feature/ticket-42-login` this runs
+`git commit -m "TICKET-42: fix login redirect"`. If no `PREFIX-123` ticket is
+found in the branch name, the message is committed as-is.
