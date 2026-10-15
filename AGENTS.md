@@ -38,6 +38,11 @@ gofmt/vet/test/build on pushes and PRs, and `release.yml` (GoReleaser) runs on
   `git commit -m "<TICKET>: <text>"`. If no ticket is found (or on detached
   `HEAD`) it commits the message as-is with a note to stderr. It cannot be
   combined with `-c`/`-u` or a pattern, and empty messages error.
+- `-l/--list [pattern]` is a standalone mode: it prints local branches whose
+  name contains `pattern` (case-insensitive, same `matchingBranches` helper as
+  the interactive path), one per line, and exits 0 with no output when nothing
+  matches. With no pattern it lists every local branch. It cannot be combined
+  with `-c`/`-u`/`-m`.
 - Viper read errors are ignored, so a missing/broken config silently uses defaults.
 - `Execute()` prints the error to stdout and calls `os.Exit(1)`.
 
