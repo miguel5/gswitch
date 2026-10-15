@@ -20,6 +20,7 @@ var createBranch bool
 var createUpstream bool
 var message string
 var listBranches bool
+var stash bool
 
 var rootCmd = &cobra.Command{
 	Use:     "gswitch [pattern]",
@@ -30,6 +31,18 @@ var rootCmd = &cobra.Command{
 		cfg, err := config.Load()
 		if err != nil {
 			return err
+		}
+
+		if stash {
+			if createBranch || createUpstream || listBranches || cmd.Flags().Changed("message") {
+				return fmt.Errorf("--stash cannot be combined with --create/--upstream/--message/--list")
+			}
+
+			if len(args) > 0 {
+				return fmt.Errorf("--stash cannot be combined with a pattern")
+			}
+
+			return browseStashes()
 		}
 
 		if listBranches {
@@ -167,6 +180,14 @@ func init() {
 		false,
 		"List branches matching the pattern without switching",
 	)
+
+	rootCmd.Flags().BoolVarP(
+		&stash,
+		"stash",
+		"s",
+		false,
+		"Browse stashes and apply or pop the selected one",
+	)
 }
 
 func switchBranch(branch string) error {
@@ -210,6 +231,60 @@ func ticketFromBranch(branch string) string {
 	}
 
 	return strings.ToUpper(match)
+}
+
+func browseStashes() error {
+	stashes, err := git.StashList()
+	if err != nil {
+		return err
+	}
+
+	if len(stashes) == 0 {
+		return fmt.Errorf("no stashes found")
+	}
+
+	idx, err := fuzzyfinder.Find(
+		stashes,
+		func(i int) string {
+			return stashes[i]
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	ref := stashRef(stashes[idx])
+
+	actions := []string{"apply", "pop"}
+
+	actionIdx, err := fuzzyfinder.Find(
+		actions,
+		func(i int) string {
+			return actions[i]
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	switch actions[actionIdx] {
+	case "apply":
+		fmt.Printf("Applying %s\n", ref)
+
+		return git.StashApply(ref)
+	default:
+		fmt.Printf("Popping %s\n", ref)
+
+		return git.StashPop(ref)
+	}
+}
+
+func stashRef(line string) string {
+	if i := strings.Index(line, ":"); i != -1 {
+		return strings.TrimSpace(line[:i])
+	}
+
+	return strings.TrimSpace(line)
 }
 
 func matchingBranches(branches []string, query string) []string {

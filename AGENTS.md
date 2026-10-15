@@ -43,6 +43,11 @@ gofmt/vet/test/build on pushes and PRs, and `release.yml` (GoReleaser) runs on
   the interactive path), one per line, and exits 0 with no output when nothing
   matches. With no pattern it lists every local branch. It cannot be combined
   with `-c`/`-u`/`-m`.
+- `-s/--stash` is a standalone mode: it fuzzy-finds over `git stash list`, then
+  asks whether to `apply` or `pop` the selected entry (ref extracted by
+  `stashRef` as the text before the first `:`). An empty stash stack errors with
+  `no stashes found`. It cannot be combined with `-c`/`-u`/`-m`/`-l` or a
+  pattern.
 - Viper read errors are ignored, so a missing/broken config silently uses defaults.
 - `Execute()` prints the error to stdout and calls `os.Exit(1)`.
 

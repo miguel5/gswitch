@@ -26,6 +26,27 @@ func TestTicketFromBranch(t *testing.T) {
 	}
 }
 
+func TestStashRef(t *testing.T) {
+	tests := []struct {
+		name string
+		line string
+		want string
+	}{
+		{"wip entry", "stash@{0}: WIP on main: some message", "stash@{0}"},
+		{"on entry", "stash@{3}: On feature/foo: message", "stash@{3}"},
+		{"message with colons", "stash@{1}: WIP on main: fix: a: b", "stash@{1}"},
+		{"no colon", "stash@{2}", "stash@{2}"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := stashRef(tt.line); got != tt.want {
+				t.Errorf("stashRef(%q) = %q, want %q", tt.line, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMatchingBranches(t *testing.T) {
 	branches := []string{"main", "feature/Login-Page", "feature/logout", "bugfix/login-crash"}
 
