@@ -19,6 +19,7 @@ var version = "dev"
 var createBranch bool
 var createUpstream bool
 var message string
+var listBranches bool
 
 var rootCmd = &cobra.Command{
 	Use:     "gswitch [pattern]",
@@ -29,6 +30,29 @@ var rootCmd = &cobra.Command{
 		cfg, err := config.Load()
 		if err != nil {
 			return err
+		}
+
+		if listBranches {
+			if createBranch || createUpstream || cmd.Flags().Changed("message") {
+				return fmt.Errorf("--list cannot be combined with --create/--upstream/--message")
+			}
+
+			branches, err := git.LocalBranches()
+			if err != nil {
+				return err
+			}
+
+			query := ""
+
+			if len(args) > 0 {
+				query = args[0]
+			}
+
+			for _, branch := range matchingBranches(branches, query) {
+				fmt.Println(branch)
+			}
+
+			return nil
 		}
 
 		if cmd.Flags().Changed("message") {
@@ -78,7 +102,7 @@ var rootCmd = &cobra.Command{
 		query := ""
 
 		if len(args) > 0 {
-			query = strings.ToLower(args[0])
+			query = args[0]
 		}
 
 		branches, err := git.LocalBranches()
@@ -86,13 +110,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		filtered := make([]string, 0)
-
-		for _, branch := range branches {
-			if query == "" || strings.Contains(strings.ToLower(branch), query) {
-				filtered = append(filtered, branch)
-			}
-		}
+		filtered := matchingBranches(branches, query)
 
 		if len(filtered) == 0 {
 			return fmt.Errorf("no matching branches found")
@@ -141,6 +159,14 @@ func init() {
 		"",
 		"Commit staged changes with the branch's ticket prefix",
 	)
+
+	rootCmd.Flags().BoolVarP(
+		&listBranches,
+		"list",
+		"l",
+		false,
+		"List branches matching the pattern without switching",
+	)
 }
 
 func switchBranch(branch string) error {
@@ -184,6 +210,20 @@ func ticketFromBranch(branch string) string {
 	}
 
 	return strings.ToUpper(match)
+}
+
+func matchingBranches(branches []string, query string) []string {
+	query = strings.ToLower(query)
+
+	matched := make([]string, 0)
+
+	for _, branch := range branches {
+		if query == "" || strings.Contains(strings.ToLower(branch), query) {
+			matched = append(matched, branch)
+		}
+	}
+
+	return matched
 }
 
 func normalizeBranchName(name string) string {

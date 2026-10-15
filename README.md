@@ -53,6 +53,13 @@ gswitch auth
 Filter branches matching "auth".
 
 ```bash
+gswitch -l auth
+```
+
+List branches matching "auth", one per line, without switching. Run
+`gswitch -l` with no pattern to list every local branch.
+
+```bash
 gswitch -c new-feature
 ```
 

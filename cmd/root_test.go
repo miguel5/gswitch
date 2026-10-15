@@ -25,3 +25,35 @@ func TestTicketFromBranch(t *testing.T) {
 		})
 	}
 }
+
+func TestMatchingBranches(t *testing.T) {
+	branches := []string{"main", "feature/Login-Page", "feature/logout", "bugfix/login-crash"}
+
+	tests := []struct {
+		name  string
+		query string
+		want  []string
+	}{
+		{"empty query returns all", "", branches},
+		{"case-insensitive substring", "LOGIN", []string{"feature/Login-Page", "bugfix/login-crash"}},
+		{"partial match", "log", []string{"feature/Login-Page", "feature/logout", "bugfix/login-crash"}},
+		{"exact match", "main", []string{"main"}},
+		{"no match", "nope", []string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := matchingBranches(branches, tt.query)
+
+			if len(got) != len(tt.want) {
+				t.Fatalf("matchingBranches(%q) = %v, want %v", tt.query, got, tt.want)
+			}
+
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("matchingBranches(%q)[%d] = %q, want %q", tt.query, i, got[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
