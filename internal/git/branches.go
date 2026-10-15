@@ -57,6 +57,45 @@ func Commit(message string) error {
 	return cmd.Run()
 }
 
+func StashList() ([]string, error) {
+	cmd := exec.Command("git", "stash", "list")
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list stashes: %w", err)
+	}
+
+	stashes := make([]string, 0)
+
+	for _, line := range strings.Split(string(out), "\n") {
+		line = strings.TrimSpace(line)
+
+		if line != "" {
+			stashes = append(stashes, line)
+		}
+	}
+
+	return stashes, nil
+}
+
+func StashApply(ref string) error {
+	return runStash("apply", ref)
+}
+
+func StashPop(ref string) error {
+	return runStash("pop", ref)
+}
+
+func runStash(action, ref string) error {
+	cmd := exec.Command("git", "stash", action, ref)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	return cmd.Run()
+}
+
 func CreateAndSwitchBranch(branch string) error {
 	cmd := exec.Command("git", "switch", "-c", branch)
 

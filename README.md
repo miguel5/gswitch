@@ -60,6 +60,13 @@ List branches matching "auth", one per line, without switching. Run
 `gswitch -l` with no pattern to list every local branch.
 
 ```bash
+gswitch -s
+```
+
+Browse the stash stack with fuzzy search, then choose to `apply` or `pop` the
+selected entry.
+
+```bash
 gswitch -c new-feature
 ```
 
